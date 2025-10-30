@@ -19,11 +19,15 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed": "ts-node src/infrastructure/database/prisma/seed.ts",
+    "prisma:reset": "prisma migrate reset --force",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "docker:reset": "docker compose down -v && docker compose up -d"
+    "docker:reset": "docker compose down -v && docker compose up -d",
+    "db:reset": "npm run docker:reset && npm run prisma:generate",
+    "db:setup": "npm run docker:up && npm run prisma:generate && npx prisma migrate dev",
+    "dev": "npm run docker:up && npm run start:dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
