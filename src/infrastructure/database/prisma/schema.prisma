@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -43,25 +42,30 @@ model Employee {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
+  password  String
   cpf       String   @unique
   phone     String?
   role      Role     @default(EMPLOYEE)
+  isActive  Boolean  @default(true)
 
-  // Professional data (for nurses)
-  coren     String?  @unique // Registro profissional de enfermeiro
+  coren     String?  @unique
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
 
+  // Vaccine relationships
   schedulingsReceived      VaccineScheduling[]   @relation("EmployeeSchedulings")
   applicationsReceived     VaccineApplication[]  @relation("EmployeeApplications")
-
   applicationsPerformed    VaccineApplication[]  @relation("NurseApplications")
 
-  // Relationships - Relatórios gerados
-  reportsGenerated         Report[]              @relation("EmployeeReports")
+  // Report relationships
+  reportsGenerated         Report[]              @relation("GeneratedReports")
+  reportsAbout             Report[]              @relation("EmployeeReports")
+
+  // Notification relationships
+  notifications            Notification[]
 
   @@map("employees")
 }
@@ -71,9 +75,8 @@ model Vaccine {
   name              String
   manufacturer      String
   description       String?
-  dosesRequired     Int      @default(1) // Número de doses necessárias
-  intervalDays      Int?     // Intervalo entre doses (em dias)
-
+  dosesRequired     Int      @default(1)
+  intervalDays      Int?     
   // Stock control
   stockQuantity     Int      @default(0)
   minStockLevel     Int      @default(10)
@@ -127,15 +130,15 @@ model VaccineApplication {
   id                  String    @id @default(uuid())
   applicationDate     DateTime  @default(now())
   doseNumber          Int       @default(1)
-  batchNumber         String    // Lote da vacina
-  applicationSite     String    // Local de aplicação (braço direito, etc)
+  batchNumber         String    
+  applicationSite     String 
   observations        String?
 
   // Foreign Keys
-  employeeId          String    // Quem recebeu a vacina
+  employeeId          String   
   vaccineId           String
-  appliedById         String    // Enfermeiro que aplicou
-  schedulingId        String?   @unique // Pode existir aplicação sem agendamento
+  appliedById         String 
+  schedulingId        String?   @unique
 
   // Timestamps
   createdAt           DateTime  @default(now())
@@ -176,10 +179,36 @@ model Report {
   deletedAt       DateTime?
 
   // Relationships
-  generatedBy     Employee    @relation("EmployeeReports", fields: [generatedById], references: [id])
+  generatedBy     Employee    @relation("GeneratedReports", fields: [generatedById], references: [id])
+  employee        Employee?   @relation("EmployeeReports", fields: [employeeId], references: [id])
 
   @@index([generatedById])
+  @@index([employeeId])
   @@index([type])
   @@index([createdAt])
   @@map("reports")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  readAt      DateTime?
+  
+  @@map("notifications")
+}
+
+enum NotificationType {
+  DOSE_REMINDER
+  VACCINE_EXPIRING
+  LOW_STOCK
+  SCHEDULING_CONFIRMED
+  GENERAL
 }

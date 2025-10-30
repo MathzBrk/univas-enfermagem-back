@@ -1,0 +1,53 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: univas-enfermagem-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-univas_enfermagem}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - univas-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application (opcional - descomente se quiser rodar a app via Docker)
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: univas-enfermagem-app
+  #   restart: unless-stopped
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-univas_enfermagem}?schema=public
+  #     NODE_ENV: ${NODE_ENV:-development}
+  #   ports:
+  #     - "${APP_PORT:-3000}:3000"
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./prisma:/app/prisma
+  #     - /app/node_modules
+  #   networks:
+  #     - univas-network
+  #   command: npm run start:dev
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  univas-network:
+    driver: bridge
