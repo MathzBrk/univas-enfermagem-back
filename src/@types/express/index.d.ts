@@ -9,7 +9,7 @@ type EnvironmentVariables = {
 };
 
 export interface TokenPayload extends JwtPayload {
-  sub: string;
+  userId: string;
   iat?: number;
   exp?: number;
 }
