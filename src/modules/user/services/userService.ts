@@ -1,7 +1,7 @@
 import { UserStore } from "@modules/user/stores/userStore";
 import { hashPassword } from "@shared/helpers/passwordHelper";
-import { getCurrentTimestamp } from "@shared/helpers/timeHelper";
 import type { CreateUserDTO, UserResponse } from "@shared/models/user";
+import dayjs from "dayjs";
 
 /**
  * UserService - Service layer for user business logic
@@ -78,8 +78,7 @@ export class UserService {
         phone: data.phone,
         role: data.role,
         coren: data.coren,
-        createdAt: getCurrentTimestamp(),
-        updatedAt: getCurrentTimestamp(),
+        updatedAt: dayjs().toDate(),
       });
 
       return {
@@ -91,8 +90,8 @@ export class UserService {
         coren: user.coren,
         id: user.id,
         isActive: user.isActive,
-        createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        createdAt: user.createdAt,
       };
     } catch (error) {
       console.log('Error creating user:', error);
