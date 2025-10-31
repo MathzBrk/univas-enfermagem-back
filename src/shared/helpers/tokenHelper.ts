@@ -37,7 +37,7 @@ export class TokenValidationError extends Error {
  *
  * @remarks
  * This function validates the token signature using JWT_SECRET from environment.
- * It also ensures the decoded payload contains the required 'sub' claim.
+ * It also ensures the decoded payload contains the required 'userId' field.
  * Specific JWT errors are allowed to bubble up for fine-grained error handling.
  */
 export const verifyToken = (token: string): TokenPayload => {
