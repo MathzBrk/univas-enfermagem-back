@@ -65,7 +65,7 @@ export const verifyToken = (token: string): TokenPayload => {
  * The 'sub' claim should contain the user ID.
  */
 export const generateToken = (
-  payload: { sub: string; [key: string]: unknown },
+  payload: TokenPayload,
   expiresIn: string = '1h'
 ): string => {
   return jwt.sign(
